@@ -1,0 +1,86 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  username      String         @unique
+  password      String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  documents     Document[]
+  conversations Conversation[]
+  documentNotes DocumentNote[]
+}
+
+model Conversation {
+  id        String     @id @default(cuid())
+  title     String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  documents Document[]
+  messages  Message[]
+  user      User       @relation(fields: [userId], references: [id])
+  userId    String
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  content        String
+  role           String       // 'user' or 'assistant'
+  createdAt      DateTime     @default(now())
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  conversationId String
+}
+
+model Document {
+  id             String         @id @default(cuid())
+  filename       String
+  originalName   String?        // Original filename before processing
+  fileType       String         // MIME type
+  s3Key          String         // S3 storage key
+  status         String         @default("PENDING") // PENDING, PROCESSING, PROCESSED, FAILED
+  isMainDocument Boolean        @default(false)     // Whether this is the main document for a conversation
+  isIndexed      Boolean        @default(false)     // Whether it's been added to vector DB
+  metadata       Json?          // Vector DB metadata, chunk counts, etc.
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  user           User           @relation(fields: [userId], references: [id])
+  userId         String
+  conversation   Conversation?  @relation(fields: [conversationId], references: [id])
+  conversationId String?        // Optional - documents can exist without being in a conversation
+  notes          DocumentNote[] // Related notes
+}
+
+enum DocumentNoteType {
+  SUMMARY
+  STUDY_NOTES
+  USER_NOTE
+}
+
+// Model for document notes (summaries, study notes, user notes)
+model DocumentNote {
+  id         String   @id @default(cuid())
+  title      String
+  content    String   @db.Text
+  type       DocumentNoteType
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  documentId String
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+}

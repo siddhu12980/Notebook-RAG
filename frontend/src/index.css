@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #7C3AED;
+  --primary-dark: #6D28D9;
+  --primary-light: #A78BFA;
+  --secondary: #10B981;
+  --bg-dark: #111827;
+  --bg-card: #1F2937;
+  --text-primary: #F9FAFB;
+  --text-secondary: #D1D5DB;
+  --text-muted: #9CA3AF;
+  --border: #374151;
+  --danger: #EF4444;
+  --warning: #F59E0B;
+  --info: #3B82F6;
+}
+
+body {
+  @apply bg-gray-900 text-gray-100;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-md font-medium transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50;
+  }
+
+  .btn-primary {
+    @apply bg-purple-600 hover:bg-purple-700 text-white focus:ring-purple-500;
+  }
+
+  .btn-secondary {
+    @apply bg-emerald-600 hover:bg-emerald-700 text-white focus:ring-emerald-500;
+  }
+
+  .btn-outline {
+    @apply border border-gray-600 hover:bg-gray-700 text-gray-200 focus:ring-gray-500;
+  }
+
+  .card {
+    @apply bg-gray-800 rounded-lg shadow-lg border border-gray-700;
+  }
+
+  .input {
+    @apply bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-gray-100 
+           focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
+           placeholder:text-gray-400;
+  }
+
+  .gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-emerald-400;
+  }
+  
+  .glass-card {
+    @apply backdrop-blur-md bg-gray-800/70 border border-gray-700/50 rounded-xl shadow-xl;
+  }
+  
+  .animated-gradient {
+    background: linear-gradient(-45deg, #7e22ce, #4f46e5, #0ea5e9, #10b981);
+    background-size: 400% 400%;
+    animation: gradient 8s ease infinite;
+  }
+  
+  @keyframes gradient {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+}

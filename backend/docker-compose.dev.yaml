@@ -1,0 +1,63 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: rag-backend-dev
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/backend
+      - JWT_SECRET=devsecretkey
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      db:
+        condition: service_healthy
+
+    healthcheck:
+      test: [
+        "CMD-SHELL",
+        "pg_isready -U postgres -d backend && psql -U postgres -d backend -c 'SELECT 1'",
+      ]
+      interval: 5s
+      timeout: 3s
+      retries: 10 # Increased retries
+      start_period: 30s # Give it time to initialize
+
+    networks:
+      - app-network-dev
+
+  db:
+    image: postgres:15-alpine
+    container_name: postgres-dev
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: backend
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - pgdata-dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d backend"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - app-network-dev
+
+networks:
+  app-network-dev:
+    driver: bridge
+
+volumes:
+  pgdata-dev:
+    driver: local
+    
+# docker-compose -f docker-compose.dev.yaml up -d
+# docker-compose -f docker-compose.dev.yaml exec app npx prisma migrate dev
